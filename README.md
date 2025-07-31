@@ -30,7 +30,7 @@ It is perfect for automated snapshots of dashboards, displays, or any URL with d
 
 ## 🔧 Usage
 
-1. Create a `config.yaml` file (not checked into Git):
+1. Create a `config.yaml` file (not checked into Git). For example:
 
    ```yaml
    url: "https://example.com/"
@@ -41,6 +41,7 @@ It is perfect for automated snapshots of dashboards, displays, or any URL with d
    screen:
      width_px: 800
      height_px: 480
+   delay_ms: 500
    ```
 
 2. Run the script:
@@ -76,7 +77,7 @@ snappy/
 
 - `config.yaml` and screenshot files (e.g., `screenshot.png` or custom names) are excluded from version control via `.gitignore`.
 - If the specified screenshot file already exists, it will only be deleted after a new screenshot is successfully captured.
-- The screen size is fully customizable in `config.yaml`.
+- The screen size and screenshot delay are customizable in `config.yaml`.
 - The screenshot file name can be customized via the `--screenshot-path` command-line argument; defaults to `screenshot.png` if not specified.
 
 ---
