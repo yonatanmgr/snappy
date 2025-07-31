@@ -42,6 +42,7 @@ It is perfect for automated snapshots of dashboards, displays, or any URL with d
      width_px: 800
      height_px: 480
    delay_ms: 500
+   bitmap: false
    ```
 
 2. Run the script:
@@ -77,7 +78,7 @@ snappy/
 
 - `config.yaml` and screenshot files (e.g., `screenshot.png` or custom names) are excluded from version control via `.gitignore`.
 - If the specified screenshot file already exists, it will only be deleted after a new screenshot is successfully captured.
-- The screen size and screenshot delay are customizable in `config.yaml`.
+- The output format (.png or .bmp), screen size and screenshot delay are customizable in `config.yaml`.
 - The screenshot file name can be customized via the `--screenshot-path` command-line argument; defaults to `screenshot.png` if not specified.
 
 ---

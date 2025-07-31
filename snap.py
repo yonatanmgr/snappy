@@ -4,11 +4,14 @@ import argparse
 from pathlib import Path
 from datetime import datetime
 from playwright.sync_api import sync_playwright
+from PIL import Image
+import io
 
 # === Configuration ===
 YAML_CONFIG_FILE = "config.yaml"
 DEFAULT_SCREENSHOT_PATH = Path("screenshot.png")
-DEFAULT_DELAY_MS = 1000
+DEFAULT_DELAY_MS = 1000  # Default 1 second delay
+
 
 def timestamp():
     return datetime.now().strftime("[%Y-%m-%d %H:%M:%S]")
@@ -42,6 +45,11 @@ def load_config(yaml_file):
     if not isinstance(delay_ms, int) or delay_ms < 0:
         raise ValueError("delay_ms must be a non-negative integer.")
 
+    # Validate bitmap flag if present
+    bitmap = config.get("bitmap", False)
+    if not isinstance(bitmap, bool):
+        raise ValueError("bitmap must be a boolean value.")
+
     return config
 
 
@@ -60,6 +68,20 @@ def main(screenshot_path=DEFAULT_SCREENSHOT_PATH):
     width = config["screen"]["width_px"]
     height = config["screen"]["height_px"]
     delay_ms = config.get("delay_ms", DEFAULT_DELAY_MS)
+    use_bitmap = config.get("bitmap", False)
+
+    # Adjust file extension based on format
+    if use_bitmap:
+        # Change extension to .bmp if it's currently .png
+        if screenshot_path.suffix.lower() == '.png':
+            screenshot_path = screenshot_path.with_suffix('.bmp')
+        elif screenshot_path.suffix.lower() not in ['.bmp']:
+            # If no extension or different extension, add .bmp
+            screenshot_path = screenshot_path.with_suffix('.bmp')
+    else:
+        # Ensure PNG extension for PNG format
+        if screenshot_path.suffix.lower() not in ['.png']:
+            screenshot_path = screenshot_path.with_suffix('.png')
 
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)
@@ -72,8 +94,17 @@ def main(screenshot_path=DEFAULT_SCREENSHOT_PATH):
         delay_seconds = delay_ms / 1000.0
         time.sleep(delay_seconds)
 
-        page.screenshot(path=str(screenshot_path))
-        print(f"{timestamp()} Screenshot saved to {screenshot_path} after {delay_ms}ms delay")
+        if use_bitmap:
+            # Take screenshot as bytes and convert to BMP
+            screenshot_bytes = page.screenshot(type="png")
+
+            # Convert PNG bytes to BMP using Pillow
+            png_image = Image.open(io.BytesIO(screenshot_bytes))
+            png_image.save(str(screenshot_path), format="BMP")
+        else:
+            # Take screenshot directly as PNG
+            page.screenshot(path=str(screenshot_path), type="png")
+            print(f"{timestamp()} Screenshot saved to {screenshot_path} after a {delay_ms}ms delay")
 
         browser.close()
 
